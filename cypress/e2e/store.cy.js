@@ -43,6 +43,7 @@ describe('Store', () => {
     it('order product', () => {
         searchPage.addProductToCart('OWASP Juice Shop Sticker Single');
         cy.log('Added product to cart');
+        cy.reload();
 
         cy.log('Opening cart page');
         cartPage.visit();

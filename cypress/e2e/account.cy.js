@@ -45,4 +45,18 @@ describe('Account', () => {
         profilePage.getEmailField().should('have.value', user.email);
         cy.log('Login verified');
     });
+
+    it('Do not login', () => {
+        loginPage.visit();
+        loginPage.closePopup();
+        cy.log('Opened login page');
+
+        loginPage.getEmailField().type(faker.internet.email());
+        loginPage.getPasswordField().type(faker.internet.password());
+        loginPage.getSubmitButton().click();
+        cy.log('Login completed');
+
+        cy.get('app-login').should('contain', 'Invalid email or password');
+        cy.log('Login error verified');
+    });
 });

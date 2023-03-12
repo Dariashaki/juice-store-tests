@@ -6,7 +6,7 @@ import createAddressPage from "../support/pages/CreateAddressPage";
 import deliveryMethodPage from "../support/pages/DeliveryMethodPage";
 import paymentPage from "../support/pages/PaymentPage";
 import orderSummaryPage from "../support/pages/OrderSummaryPage";
-import { loginWithUI } from "../support/helpers";
+import { headlessLogin } from "../support/helpers";
 
 const address = {
     country: faker.address.country(),
@@ -29,18 +29,15 @@ const card = {
     }),
 };
 
-console.log({
-    address,
-    card
-})
-
 describe('Store', () => {
     beforeEach(() => {
-        loginWithUI();
-        cy.wait(1000);
+        cy.setCookie('welcomebanner_status', 'dismiss');
+        cy.setCookie('cookieconsent_status', 'dismiss');
+        headlessLogin();
     });
 
     it('order product', () => {
+        searchPage.visit();
         searchPage.addProductToCart('OWASP Juice Shop Sticker Single');
         cy.log('Added product to cart');
         cy.reload();
@@ -62,10 +59,11 @@ describe('Store', () => {
         createAddressPage.getAddressField().type(address.address);
         createAddressPage.getCityField().type(address.city);
         createAddressPage.getSubmitButton().click();
+        cy.wait(1000);
 
         // Select newly added address
         cy.log('Selecting newly added address');
-        addressSelectPage.getAddressOptions().first().click();
+        addressSelectPage.getAddressOptions().last().click();
         addressSelectPage.getContinueButton().click();
 
         cy.log('Selecting delivery method');
@@ -80,8 +78,9 @@ describe('Store', () => {
         paymentPage.getExpiryYearSelect().select(card.expiryYear.toString());
         paymentPage.getSubmitCardButton().click();
         cy.log('Added new card');
+        cy.wait(1000);
 
-        paymentPage.getCardOptions().first().click();
+        paymentPage.getCardOptions().last().click();
         cy.log('Selected newly added card');
 
         paymentPage.getContinueButton().click();

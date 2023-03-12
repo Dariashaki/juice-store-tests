@@ -1,26 +1,32 @@
 import { faker } from '@faker-js/faker';
-import loginPage from "../support/pages/LoginPage";
 import profilePage from "../support/pages/ProfilePage";
 import registrationPage from "../support/pages/RegistrationPage";
 import user from '../fixtures/user.json';
+import { loginWithUI } from "../support/helpers";
 
-user.email = faker.internet.email();
-user.password = faker.internet.password();
-user.securityAnswer = faker.name.firstName();
+const fakeUser = {
+    email: faker.internet.email(),
+    password: faker.internet.password(),
+    securityAnswer: faker.name.firstName()
+}
 
 describe('Account', () => {
+    beforeEach(() => {
+        cy.setCookie('welcomebanner_status', 'dismiss');
+        cy.setCookie('cookieconsent_status', 'dismiss');
+    });
+
     it('Registration', () => {
         registrationPage.visit();
-        registrationPage.closePopup();
         cy.log('Opened registration page');
 
-        registrationPage.getEmailField().type(user.email);
-        registrationPage.getPasswordField().type(user.password);
-        registrationPage.getRepeatPasswordField().type(user.password);
+        registrationPage.getEmailField().type(fakeUser.email);
+        registrationPage.getPasswordField().type(fakeUser.password);
+        registrationPage.getRepeatPasswordField().type(fakeUser.password);
 
         registrationPage.getSecurityQuestionSelect().click();
         registrationPage.getSecurityQuestionOptions().eq(0).click();
-        registrationPage.getSecurityAnswerField().type(user.securityAnswer);
+        registrationPage.getSecurityAnswerField().type(fakeUser.securityAnswer);
 
         registrationPage.getSubmitButton().click();
         cy.log('Registration completed');
@@ -30,13 +36,7 @@ describe('Account', () => {
     });
 
     it('Login', () => {
-        loginPage.visit();
-        loginPage.closePopup();
-        cy.log('Opened login page');
-
-        loginPage.getEmailField().type(user.email);
-        loginPage.getPasswordField().type(user.password);
-        loginPage.getSubmitButton().click();
+        loginWithUI(user.email, user.password);
         cy.log('Login completed');
 
         cy.wait(1000); // якщо одразу перейти на профайл, то буде помилка
@@ -47,14 +47,7 @@ describe('Account', () => {
     });
 
     it('Do not login', () => {
-        loginPage.visit();
-        loginPage.closePopup();
-        cy.log('Opened login page');
-
-        loginPage.getEmailField().type(faker.internet.email());
-        loginPage.getPasswordField().type(faker.internet.password());
-        loginPage.getSubmitButton().click();
-        cy.log('Login completed');
+        loginWithUI(faker.internet.email(), faker.internet.password());
 
         cy.get('app-login').should('contain', 'Invalid email or password');
         cy.log('Login error verified');

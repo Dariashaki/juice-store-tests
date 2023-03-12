@@ -3,7 +3,6 @@ import { findProduct } from "../helpers";
 
 export class SearchPage extends BasePage {
     visit() {
-        console.log('visiting search page');
         return cy.visit('/');
     }
 
